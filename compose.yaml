@@ -1,0 +1,43 @@
+networks:
+  interal:
+    driver: bridge
+
+volumes:
+  postgres-data:
+
+services:
+  postgres-db:
+    image: 'postgres:17'
+    restart: unless-stopped
+
+    environment:
+      - 'POSTGRES_DB=postgres'
+      - 'POSTGRES_PASSWORD=q1w2e3r4t5y6u7i8o9p0'
+      - 'POSTGRES_USER=postgres'
+      - 'PGPORT=5432'
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    ports:
+      - '5432:5432'
+    
+    networks:
+      - interal
+  
+  pg-admin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: q1w2e3r4t5y6u7i8o9p0
+      PGADMIN_LISTEN_PORT: 8088
+    
+    ports:
+      - 8088:8088
+    
+    depends_on:
+      - postgres-db
+
+    networks:
+      - interal
