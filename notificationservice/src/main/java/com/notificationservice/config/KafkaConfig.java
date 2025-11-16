@@ -15,9 +15,6 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import com.notificationservice.dto.UserActionEvent;
 
-
-
-
 @Configuration
 @EnableKafka
 public class KafkaConfig {

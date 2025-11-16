@@ -1,11 +1,29 @@
 networks:
-  interal:
+  internal:
     driver: bridge
 
 volumes:
   postgres-data:
+  kafka-data:
 
 services:
+  pg-admin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: q1w2e3r4t5y6u7i8o9p0
+      PGADMIN_LISTEN_PORT: 8088
+    
+    ports:
+      - 8088:8088
+    
+    depends_on:
+      - postgres-db
+
+    networks:
+      - internal
+
   postgres-db:
     image: 'postgres:17'
     restart: unless-stopped
@@ -23,21 +41,85 @@ services:
       - '5432:5432'
     
     networks:
-      - interal
-  
-  pg-admin:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
-      PGADMIN_DEFAULT_PASSWORD: q1w2e3r4t5y6u7i8o9p0
-      PGADMIN_LISTEN_PORT: 8088
+      - internal
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
     
     ports:
-      - 8088:8088
-    
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_COORDINATOR_REBALANCE_PROTOCOLS: "classic,consumer"
+      
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - internal
+
+  user-service:
+    build: ./userservice 
     depends_on:
       - postgres-db
-
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: q1w2e3r4t5y6u7i8o9p0
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     networks:
-      - interal
+      - internal
+  
+  notification-service:
+    build: ./notificationservice 
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+      SPRING_MAIL_HOST: greenmail
+      SPRING_MAIL_PORT: 3025
+      SPRING_MAIL_USERNAME: admin@localhost
+      SPRING_MAIL_PASSWORD: q1w2e3r4t5y6u7i8o9p0
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: 'false'
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: 'false'
+    networks:
+      - internal
+  
+  greenmail:
+    image: greenmail/standalone
+    ports:
+      - "3025:3025"   # SMTP
+      - "3110:3110"   # POP3
+      - "3143:3143"   # IMAP
+      - "3465:3465"   # SMTPS
+      - "3993:3993"   # IMAPS
+      - "3995:3995"   # POP3S
+    networks:
+      - internal
+
+    command: "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.verbose"
+  
+
+
