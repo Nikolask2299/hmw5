@@ -1,1 +1,1 @@
-Запуск: mvn spring-boot:run 
+docker-compose up --build

@@ -1,0 +1,9 @@
+com\notificationservice\controller\EmailController.class
+com\notificationservice\service\KafkaConsumerService.class
+com\notificationservice\dto\EmailRequest.class
+com\notificationservice\NotificationApplication.class
+com\notificationservice\exception\NotificationException.class
+com\notificationservice\service\EmailService.class
+com\notificationservice\exception\GlobalExceptionHandler.class
+com\notificationservice\config\KafkaConfig.class
+com\notificationservice\dto\UserActionEvent.class

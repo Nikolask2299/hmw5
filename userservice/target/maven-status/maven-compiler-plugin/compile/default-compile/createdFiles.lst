@@ -1,0 +1,10 @@
+com\userservice\controller\UserController.class
+com\userservice\entity\User.class
+com\userservice\exception\UserNotFoundException.class
+com\userservice\service\UserService.class
+com\userservice\repository\UserRepository.class
+com\userservice\UserApplication.class
+com\userservice\dto\UserActionEvent.class
+com\userservice\dto\UserDto.class
+com\userservice\exception\GlobalExceptionHandler.class
+com\userservice\dto\CreateUserRequest.class

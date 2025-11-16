@@ -8,9 +8,9 @@ spring:
     properties:
       mail:
         smtp:
-          auth: true
+          auth: false
           starttls:
-            enable: true
+            enable: false
     default-encoding: UTF-8
 
 logging:
