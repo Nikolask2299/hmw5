@@ -1,0 +1,21 @@
+
+spring:
+  mail:
+    host: smtp.localhost
+    port: 5875
+    username: admin@localhost
+    password: q1w2e3r4t5y6u7i8o9p0
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    default-encoding: UTF-8
+
+logging:
+  level:
+    com.example.notificationservice: DEBUG
+    org.springframework.kafka: DEBUG
+    org.testcontainers: INFO
+    org.apache.kafka: WARN
