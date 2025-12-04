@@ -120,6 +120,36 @@ services:
       - internal
 
     command: "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.verbose"
-  
 
 
+  eureka-server:
+    build: ./eurekaserver
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal
+
+  config-server:
+    build: ./configserver
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+      - config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal

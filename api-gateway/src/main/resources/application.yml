@@ -8,7 +8,7 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true 
+          enabled: true
       routes:
         - id: user-service
           uri: lb://user-service
@@ -18,3 +18,8 @@ spring:
           uri: lb://notification-service
           predicates:
             - Path=/api/email/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
